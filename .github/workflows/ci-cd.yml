@@ -18,21 +18,15 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          
-      - name: List root directory
-        run: ls -la
-      
+
       - name: Build JAR
         run: mvn clean package -DskipTests
 
-      - name: List contents of target/
-        run: ls -la target
-
-      - name: Show files tree
+      - name: Prepare deploy folder
         run: |
-          pwd
-          ls -la
-          ls -la target
+          mkdir deploy
+          cp Dockerfile docker-compose.yml deploy/
+          cp target/*.jar deploy
 
       - name: Copy JAR and Docker files to server
         uses: appleboy/scp-action@v0.1.4
@@ -40,7 +34,7 @@ jobs:
           host: 45.12.236.8
           username: root
           key: ${{ secrets.MY_SECRET }}
-          source: /home/runner/work/TelegramBot/TelegramBot/
+          source: /deploy
           target: /root/app
 
       - name: Build and run Docker on server

@@ -47,6 +47,6 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.MY_SECRET }}
           script: |
-            cd /root/app/github/workspace/deploy
+            cd /root/app/deploy
             docker-compose down || true
             docker-compose up -d

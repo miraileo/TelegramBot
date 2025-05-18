@@ -23,9 +23,7 @@ jobs:
         run: ls -la
       
       - name: Build JAR
-        run: |
-          cd SpringBot
-          mvn clean package -DskipTests
+        run: mvn clean package -DskipTests
 
       - name: List contents of target/
         run: ls -la target

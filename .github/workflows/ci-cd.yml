@@ -32,7 +32,7 @@ jobs:
           username: root
           key: ${{ secrets.MY_SECRET }}
           source: |
-            target/*.jar
+            "target/*.jar"
             Dockerfile
             docker-compose.yml
           target: /root/app

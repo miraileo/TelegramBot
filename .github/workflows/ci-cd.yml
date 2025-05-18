@@ -28,6 +28,13 @@ jobs:
       - name: List contents of target/
         run: ls -la target
 
+      - name: Show files tree
+        run: |
+          pwd
+          ls -la
+          ls -la target
+
+      
       - name: Copy JAR and Docker files to server
         uses: appleboy/scp-action@v0.1.4
         with:

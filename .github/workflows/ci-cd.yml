@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build JAR
-        run: mvn clean package -DskipTests
+        run: mvn -f SpringBot/pom.xml clean package -DskipTests
 
       - name: List contents of target/
         run: ls -la target
@@ -33,8 +33,6 @@ jobs:
           key: ${{ secrets.MY_SECRET }}
           source: |
             source: "SpringBot/target/*.jar"
-            Dockerfile
-            docker-compose.yml
           target: /root/app
 
       - name: Build and run Docker on server

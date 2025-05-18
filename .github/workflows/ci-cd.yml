@@ -22,24 +22,19 @@ jobs:
       - name: Build JAR
         run: mvn clean package -DskipTests
 
-      - name: Build Docker image
-        run: docker build -t my-app .
-
-      - name: Save Docker image to file
-        run: docker save my-app -o my-app.tar
-
-      - name: Copy Docker image and compose to server
+      - name: Copy JAR and Docker files to server
         uses: appleboy/scp-action@v0.1.4
         with:
           host: 45.12.236.8
           username: root
           key: ${{ secrets.MY_SECRET }}
           source: |
-            my-app.tar
+            target/*.jar
+            Dockerfile
             docker-compose.yml
           target: /root/app
 
-      - name: Deploy Docker container
+      - name: Build and run Docker on server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: 45.12.236.8
@@ -47,6 +42,6 @@ jobs:
           key: ${{ secrets.MY_SECRET }}
           script: |
             cd /root/app
-            docker load -i my-app.tar
             docker compose down || true
+            docker compose build
             docker compose up -d

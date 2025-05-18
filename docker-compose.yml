@@ -1,6 +1,8 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - ${PORT}:${PORT}
     restart: always
@@ -8,4 +10,3 @@ services:
       BOT_TOKEN: ${BOT_TOKEN}
       BOT_NAME: ${BOT_NAME}
       PORT: ${PORT}
-    container_name: my-app

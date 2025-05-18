@@ -35,7 +35,7 @@ jobs:
           username: root
           key: ${{ secrets.MY_SECRET }}
           source: |
-            source: "SpringBot/target/*.jar"
+            source: "target/*.jar"
           target: /root/app
 
       - name: Build and run Docker on server

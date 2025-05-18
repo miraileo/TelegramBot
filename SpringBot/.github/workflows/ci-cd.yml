@@ -1,0 +1,42 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Copy JAR to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: 45.12.236.8
+          username: root
+          key: ${{ secrets.MY_SECRER }}
+          source: "target/*.jar"
+          target: "/root/app"
+
+      - name: Run app on server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 45.12.236.8
+          username: root
+          key: ${{ secrets.MY_SECRER }}
+          script: |
+            pkill -f ".jar" || true
+            cd /root/app
+            nohup java -jar *.jar > app.log 2>&1 &

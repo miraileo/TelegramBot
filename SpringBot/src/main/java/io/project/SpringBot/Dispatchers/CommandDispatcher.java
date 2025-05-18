@@ -1,82 +1,47 @@
 package io.project.SpringBot.Dispatchers;
 
-import io.project.SpringBot.Backend.InlineDocumentButtons;
-import io.project.SpringBot.Backend.InlineRaspisanieButtons;
-import io.project.SpringBot.Comands.DocumentCommand;
-import io.project.SpringBot.Comands.PhotoCommand;
-import io.project.SpringBot.Comands.StartCommand;
-import io.project.SpringBot.Configuration.BotConfiguration;
-import io.project.SpringBot.Data.Raspisanie;
 import io.project.SpringBot.Interfaces.BotCommand;
-import io.project.SpringBot.MYAmazingBot;
+import io.project.SpringBot.Interfaces.ButtonsProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.HashMap;
-import java.util.Map;
-@Configuration
+@Service
 public class CommandDispatcher {
 
-    private final Map<String, BotCommand> commandMap = new HashMap<>();
-    private final DocumentCommand documentCommand;
-    private final PhotoCommand photoCommand;
-    private final MYAmazingBot bot;
-    private final Raspisanie raspisanie;
     @Autowired
-    public CommandDispatcher(MYAmazingBot bot, BotConfiguration botConfiguration, Raspisanie raspisanie) {
-        this.bot = bot;
-        this.raspisanie = raspisanie;
-        commandMap.put("/start", new StartCommand(bot));
-        commandMap.put("/document", new InlineDocumentButtons(bot));
-        commandMap.put("/raspisanie", new InlineRaspisanieButtons(bot));
-        photoCommand = new PhotoCommand(bot, raspisanie);
-        documentCommand = new DocumentCommand(bot, botConfiguration);
-    }
+    private ButtonsProvider buttonsProvider;
 
-    public void handleCommand(Update update) throws TelegramApiException {
-        BotCommand command;
+    @Autowired @Qualifier("startCommand")
+    private BotCommand startCommand;
+
+    @Autowired @Qualifier("scheduleCommand")
+    private BotCommand scheduleCommand;
+
+    public void handleCommand(Update update, TelegramLongPollingBot bot) throws TelegramApiException {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            String messageText = update.getMessage().getText();
+            switch (update.getMessage().getText()) {
+                case "/start" -> bot.execute(startCommand.getMessage(update));
+                case "/raspisanie" -> bot.execute(buttonsProvider.getButtons(update));
+            }
+        } else if (update.hasCallbackQuery()) {
+            var message = update.getCallbackQuery().getMessage();
+            String chatId = String.valueOf(message.getChatId());
+            int messageId = message.getMessageId();
 
-            command = commandMap.get(messageText);
-            if (command != null) {
-                command.execute(update);
-            } else {
-                System.out.println("Unknown command: " + messageText);
-            }
-        }
-        else if (update.hasCallbackQuery()) {
-            String callbackData = update.getCallbackQuery().getData();
-            if(callbackData.contains("raspisanie")){
-                command = photoCommand;
-                photoCommand.setDay(callbackData);
-            }
-            else if(callbackData.contains("document")) {
-                command = documentCommand;
-                documentCommand.setFileName(callbackData);
-            }
-            else return;
-            if (command != null){
-                long chatId = update.getCallbackQuery().getMessage().getChatId();
-                int messageId = update.getCallbackQuery().getMessage().getMessageId();
-                DeleteMessage deleteMessage = new DeleteMessage();
-                deleteMessage.setChatId(String.valueOf(chatId));
-                deleteMessage.setMessageId(messageId);
-                bot.execute(deleteMessage);
-                SendMessage waitMessage = new SendMessage();
-                waitMessage.setChatId(String.valueOf(chatId));
-                waitMessage.setText("Пожалуйста, подождите...");
-                var sentWaitMessage = bot.execute(waitMessage);
-                command.execute(update);
-                DeleteMessage deleteWaitMessage = new DeleteMessage();
-                deleteWaitMessage.setChatId(String.valueOf(chatId));
-                deleteWaitMessage.setMessageId(sentWaitMessage.getMessageId());
-                bot.execute(deleteWaitMessage);
-            }
+            bot.execute(DeleteMessage.builder().chatId(chatId).messageId(messageId).build());
+
+            var waitMessage = SendMessage.builder().chatId(chatId).text("Пожалуйста, подождите...").build();
+            int waitMessageId = bot.execute(waitMessage).getMessageId();
+
+            bot.execute(scheduleCommand.getMessage(update));
+
+            bot.execute(DeleteMessage.builder().chatId(chatId).messageId(waitMessageId).build());
         }
     }
 }

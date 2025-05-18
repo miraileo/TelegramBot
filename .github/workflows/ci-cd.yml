@@ -41,7 +41,10 @@ jobs:
           host: 45.12.236.8
           username: root
           key: ${{ secrets.MY_SECRET }}
-          source: /home/runner/work/TelegramBot/TelegramBot/target/SpringBot-0.0.1-SNAPSHOT.jar
+          source: |
+            /home/runner/work/TelegramBot/TelegramBot/target/SpringBot-0.0.1-SNAPSHOT.jar
+            /home/runner/work/TelegramBot/TelegramBot/docker-compose.yml
+            /home/runner/work/TelegramBot/TelegramBot/Dockerfile
           target: /root/app
 
       - name: Build and run Docker on server

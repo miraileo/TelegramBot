@@ -18,9 +18,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-
+          
+      - name: List root directory
+        run: ls -la
+      
       - name: Build JAR
-        run: mvn -f SpringBot/pom.xml clean package -DskipTests
+        run: |
+          cd SpringBot
+          mvn clean package -DskipTests
 
       - name: List contents of target/
         run: ls -la target

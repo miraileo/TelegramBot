@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Deploy Docker
 
 on:
   push:
@@ -19,25 +19,34 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Maven
+      - name: Build JAR
         run: mvn clean package -DskipTests
 
-      - name: Copy JAR to server
+      - name: Build Docker image
+        run: docker build -t my-app .
+
+      - name: Save Docker image to file
+        run: docker save my-app -o my-app.tar
+
+      - name: Copy Docker image and compose to server
         uses: appleboy/scp-action@v0.1.4
         with:
           host: 45.12.236.8
           username: root
           key: ${{ secrets.MY_SECRET }}
-          source: "target/*.jar"
-          target: "/root/app"
+          source: |
+            my-app.tar
+            docker-compose.yml
+          target: /root/app
 
-      - name: Run app on server
+      - name: Deploy Docker container
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: 45.12.236.8
           username: root
           key: ${{ secrets.MY_SECRET }}
           script: |
-            pkill -f ".jar" || true
             cd /root/app
-            nohup java -jar *.jar > app.log 2>&1 &
+            docker load -i my-app.tar
+            docker compose down || true
+            docker compose up -d

@@ -27,12 +27,6 @@ jobs:
           mkdir deploy
           cp Dockerfile docker-compose.yml deploy/
           cp target/*.jar deploy
-          
-      - name: Show files tree
-        run: |
-          pwd
-          ls -la
-          ls -la target
 
       - name: Copy JAR and Docker files to server
         uses: appleboy/scp-action@v0.1.4
@@ -40,10 +34,8 @@ jobs:
           host: 45.12.236.8
           username: root
           key: ${{ secrets.MY_SECRET }}
-          source: /deploy
+          source: /home/runner/work/TelegramBot/TelegramBot/deploy
           target: /root/app
-
-
 
       - name: Build and run Docker on server
         uses: appleboy/ssh-action@v1.0.0
@@ -52,6 +44,6 @@ jobs:
           username: root
           key: ${{ secrets.MY_SECRET }}
           script: |
-            cd /root/app/github/workspace
+            cd /root/app/github/workspace/deploy
             docker-compose down || true
             docker-compose up -d

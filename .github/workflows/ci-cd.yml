@@ -41,7 +41,7 @@ jobs:
           host: 45.12.236.8
           username: root
           key: ${{ secrets.MY_SECRET }}
-          source: /home/runner/work/TelegramBot/TelegramBot/*
+          source: /home/runner/work/TelegramBot/TelegramBot/Dockefile
           target: /root/app
 
       - name: Build and run Docker on server

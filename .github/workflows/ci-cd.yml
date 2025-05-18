@@ -35,7 +35,9 @@ jobs:
           username: root
           key: ${{ secrets.MY_SECRET }}
           source: |
-            source: "target/*.jar"
+            target/*.jar
+            Dockerfile
+            docker-compose.yml
           target: /root/app
 
       - name: Build and run Docker on server

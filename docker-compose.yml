@@ -1,9 +1,11 @@
-version: '3.8'
-
 services:
   app:
     build: .
     ports:
-      - "9090:9090"
+      - ${PORT}:${PORT}
     restart: always
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      BOT_NAME: ${BOT_NAME}
+      PORT: ${PORT}
     container_name: my-app

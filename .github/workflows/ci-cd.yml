@@ -22,26 +22,29 @@ jobs:
       - name: Build JAR
         run: mvn clean package -DskipTests
 
-      - name: Prepare deploy folder
+      - name: Prepare deploy folder and .env file
         run: |
           mkdir deploy
+          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> deploy/.env
+          echo "BOT_NAME=${{ secrets.BOT_NAME }}" >> deploy/.env
+          echo "PORT=${{ secrets.PORT }}" >> deploy/.env
           cp Dockerfile docker-compose.yml deploy/
           cp target/*.jar deploy
 
-      - name: Copy JAR and Docker files to server
+      - name: Copy files to server
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: 45.12.236.8
-          username: root
+          host: ${{ secrets.SERVER }}
+          username: ${{ secrets.USER }}
           key: ${{ secrets.MY_SECRET }}
-          source: /home/runner/work/TelegramBot/TelegramBot/deploy
+          source: ./deploy
           target: /root/app
 
       - name: Build and run Docker on server
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: 45.12.236.8
-          username: root
+          host: ${{ secrets.SERVER }}
+          username: ${{ secrets.USER }}
           key: ${{ secrets.MY_SECRET }}
           script: |
             cd /root/app/github/workspace/deploy

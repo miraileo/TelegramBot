@@ -32,7 +32,7 @@ public class Schedule {
         OuterObject friday = new OuterObject();
         OuterObject saturday = new OuterObject();
         OuterObject sunday = new OuterObject();
-        monday.getInnerObjects().add(new InnerObject("08:00\nВоенная подготовка", "any"));
+        monday.getInnerObjects().add(new InnerObject("08:00\nПодготовка бойцов", "any"));
 
         tuesday.getInnerObjects().add(new InnerObject("08:00-11:10\nУстройства приема и обработки сигналов\n309/5(лаба)\nЦАРЕВА МАРИЯ АНАТОЛЬЕВНА",
                 "10.09 08.10 17.09 15.10 12.11 10.12 | 05.11 03.12 01.10 29.10 26.11 24.12"));
